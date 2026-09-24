@@ -1,5 +1,3 @@
-# MonteCarlo-Larpathon
-
 # Monte Carlo Option Pricing Engines
 
 ## What the programs do
