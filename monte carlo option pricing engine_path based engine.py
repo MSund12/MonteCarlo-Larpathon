@@ -338,10 +338,7 @@ def price_option_monte_carlo(
         simulations=simulations
     )
 
-
-# ============================================================
 # 6. RESULT DISPLAY
-# ============================================================
 
 def print_pricing_summary(
     market: MarketData,
@@ -379,10 +376,7 @@ def print_pricing_summary(
 
     print("=" * 60 + "\n")
 
-
-# ============================================================
 # 7. PROGRAM ENTRY POINT
-# ============================================================
 
 def main() -> None:
     """
