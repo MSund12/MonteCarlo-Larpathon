@@ -384,17 +384,17 @@ def main() -> None:
     """
 
     market = MarketData(
-        spot_price=100.00,
-        risk_free_rate=0.05,
-        volatility=0.20,
-        dividend_yield=0.00
+        spot_price = 100.00,
+        risk_free_rate = 0.05,
+        volatility = 0.20,
+        dividend_yield = 0.00
     )
 
     option = OptionContract(
-        strike_price=100.00,
-        maturity_years=1.00,
-        option_type="call",
-        product_type="asian"
+        strike_price = 100.00,
+        maturity_years = 1.00,
+        option_type = "call",
+        product_type = "asian"
 
         # For a barrier option, add:
         # barrier_price=130.00
@@ -404,18 +404,18 @@ def main() -> None:
     time_steps = 252
 
     result = price_option_monte_carlo(
-        market=market,
-        option=option,
-        simulations=simulations,
-        time_steps=time_steps,
+        market = market,
+        option = option,
+        simulations = simulations,
+        time_steps = time_steps,
         seed=42
     )
 
     print_pricing_summary(
-        market=market,
-        option=option,
-        result=result,
-        time_steps=time_steps
+        market = market,
+        option = option,
+        result = result,
+        time_steps = time_steps
     )
 
 if __name__ == "__main__":
