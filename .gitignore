@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local demo dependencies and test artifacts
+.visualization-deps/
+.test-temp/
+verification.log
+.repository-publish/

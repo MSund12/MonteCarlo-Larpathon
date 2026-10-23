@@ -1,0 +1,29 @@
+{
+  "configuration": {
+    "engine": "terminal",
+    "product": "european",
+    "option_type": "put",
+    "spot": 100,
+    "strike": 100,
+    "maturity": 1,
+    "rate": 0.05,
+    "volatility": 0.2,
+    "dividend": 0,
+    "barrier": null,
+    "simulations": 10000,
+    "time_steps": 252,
+    "seed": 42,
+    "backend": "auto",
+    "batch_size": 8192
+  },
+  "backend_used": "numpy",
+  "result": {
+    "price": 5.647839436976215,
+    "standard_error": 0.08787661648249666,
+    "confidence_interval_low": 5.4756012686705215,
+    "confidence_interval_high": 5.820077605281908,
+    "simulations": 10000
+  },
+  "black_scholes_price": 5.573526022256971,
+  "elapsed_seconds": 3.7873691000277176
+}

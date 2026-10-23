@@ -1,0 +1,29 @@
+{
+  "configuration": {
+    "engine": "path",
+    "product": "up_and_out_barrier",
+    "option_type": "call",
+    "spot": 100,
+    "strike": 100,
+    "maturity": 1,
+    "rate": 0.05,
+    "volatility": 0.2,
+    "dividend": 0,
+    "barrier": 130.0,
+    "simulations": 10000,
+    "time_steps": 252,
+    "seed": 42,
+    "backend": "auto",
+    "batch_size": 8192
+  },
+  "backend_used": "numpy",
+  "result": {
+    "price": 3.5666607950885356,
+    "standard_error": 0.06382006918864819,
+    "confidence_interval_low": 3.4415734594787852,
+    "confidence_interval_high": 3.691748130698286,
+    "simulations": 10000
+  },
+  "black_scholes_price": null,
+  "elapsed_seconds": 0.5159903999883682
+}

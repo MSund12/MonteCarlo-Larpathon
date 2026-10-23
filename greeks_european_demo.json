@@ -1,0 +1,109 @@
+{
+  "configuration": {
+    "engine": "terminal",
+    "product": "european",
+    "option_type": "call",
+    "spot": 100,
+    "strike": 100,
+    "maturity": 1,
+    "rate": 0.05,
+    "volatility": 0.2,
+    "dividend": 0,
+    "barrier": null,
+    "simulations": 40000,
+    "time_steps": 252,
+    "seed": 42,
+    "backend": "auto",
+    "batch_size": 8192,
+    "variance_reduction": "both",
+    "greeks": true,
+    "pilot_simulations": 2048,
+    "spot_bump": 0.005,
+    "volatility_bump": 0.001,
+    "rate_bump": 0.0001,
+    "maturity_bump": 0.0027397260273972603
+  },
+  "backend_used": "numpy",
+  "result": {
+    "price": 10.437154732915413,
+    "standard_error": 0.013810299957521775,
+    "confidence_interval_low": 10.41008654499867,
+    "confidence_interval_high": 10.464222920832157,
+    "simulations": 40000
+  },
+  "black_scholes_price": 10.450583572185565,
+  "elapsed_seconds": 0.24362510000355542,
+  "greeks": {
+    "delta": {
+      "estimate": 0.636938128573125,
+      "standard_error": 0.0009555048546527488,
+      "confidence_interval_low": 0.6350653390580057,
+      "confidence_interval_high": 0.6388109180882444,
+      "independent_samples": 20000,
+      "unit": "price per $1 spot"
+    },
+    "gamma": {
+      "estimate": 0.017282508970931094,
+      "standard_error": 0.0007236131942566351,
+      "confidence_interval_low": 0.01586422711018809,
+      "confidence_interval_high": 0.0187007908316741,
+      "independent_samples": 20000,
+      "unit": "delta per $1 spot"
+    },
+    "vega": {
+      "estimate": 0.37450424524930126,
+      "standard_error": 0.0008888828095492131,
+      "confidence_interval_low": 0.3727620349425848,
+      "confidence_interval_high": 0.37624645555601777,
+      "independent_samples": 20000,
+      "unit": "price per 1 percentage point volatility"
+    },
+    "rho": {
+      "estimate": 0.5323892881117146,
+      "standard_error": 0.0010897759064204407,
+      "confidence_interval_low": 0.5302533273351305,
+      "confidence_interval_high": 0.5345252488882987,
+      "independent_samples": 20000,
+      "unit": "price per 1 percentage point interest rate"
+    },
+    "theta": {
+      "estimate": -0.017556892131904235,
+      "standard_error": 1.5746646323381907e-05,
+      "confidence_interval_low": -0.017587755558698067,
+      "confidence_interval_high": -0.017526028705110407,
+      "independent_samples": 20000,
+      "unit": "price per calendar day"
+    }
+  },
+  "estimator": {
+    "method": "both",
+    "independent_samples": 20000,
+    "production_paths": 40000,
+    "pilot_paths": 2048,
+    "total_path_evaluations": 378432,
+    "parameter_scenarios": 9,
+    "control_coefficients": {
+      "price": 2.5332377697112873,
+      "delta": 0.9789311187570872,
+      "gamma": 0.0,
+      "vega": 1.6066229944702841,
+      "rho": 0.0,
+      "theta": 1.5290525182183812
+    },
+    "control_name": "discounted terminal stock",
+    "unadjusted_price": 10.48501511878989,
+    "unadjusted_standard_error": 0.05241782547852331,
+    "bumps": {
+      "spot_absolute": 0.5,
+      "volatility_absolute": 0.001,
+      "rate_absolute": 0.0001,
+      "maturity_years": 0.0027397260273972603,
+      "vega_scheme": "central",
+      "theta_convention": "-dV/dT; monitoring dates rescaled with maturity"
+    }
+  },
+  "notes": [
+    "Intervals quantify Monte Carlo sampling uncertainty, not model error or finite-difference bias.",
+    "Greeks use common-random-number finite differences; check sensitivity to bump sizes."
+  ]
+}

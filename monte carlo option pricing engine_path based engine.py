@@ -1,23 +1,26 @@
-"""
-Path-Based Monte Carlo Option Pricing Engine — Blueprint
 
-Products supported:
-    1. European options
-    2. Asian options using arithmetic-average price
-    3. Up-and-out barrier options
 
-Run:
-    python path_option_pricing_sketch.py
 
-No external packages required.
-"""
+
+
+
+
+
+
+
+
+
+
 
 from dataclasses import dataclass
 from math import exp, sqrt
 from random import Random
-from statistics import stdev
+from pricing_common import validate_market_contract, validate_count
+from pricing_kernels import price as price_kernel
+from math import isfinite
+from collections.abc import Iterator
 
-# 1. INPUT MODELS
+
 
 @dataclass
 class MarketData:
@@ -29,18 +32,18 @@ class MarketData:
 
 @dataclass
 class OptionContract:
-    """
-    product_type choices:
-        "european"
-        "asian"
-        "up_and_out_barrier"
 
-    option_type choices:
-        "call"
-        "put"
 
-    barrier_price is only needed for up-and-out barrier options.
-    """
+
+
+
+
+
+
+
+
+
+
 
     strike_price: float
     maturity_years: float
@@ -58,7 +61,7 @@ class PricingResult:
     confidence_interval_high: float
     simulations: int
 
-# 2. INPUT VALIDATION
+
 
 def validate_inputs(
     market: MarketData,
@@ -67,28 +70,12 @@ def validate_inputs(
     time_steps: int
 ) -> None:
 
-    valid_option_types = {"call", "put"}
-
-    valid_product_types = {
-        "european",
-        "asian",
-        "up_and_out_barrier"
-    }
-
-    if market.spot_price <= 0:
-        raise ValueError("Spot price must be greater than zero.")
-
-    if market.volatility < 0:
-        raise ValueError("Volatility cannot be negative.")
-
-    if option.strike_price <= 0:
-        raise ValueError("Strike price must be greater than zero.")
-
-    if option.maturity_years <= 0:
-        raise ValueError("Maturity must be greater than zero.")
-
-    if option.option_type.lower() not in valid_option_types:
-        raise ValueError("Option type must be 'call' or 'put'.")
+    validate_market_contract(market, option)
+    validate_count(simulations, "simulations", minimum=2)
+    validate_count(time_steps, "time_steps", minimum=1)
+    valid_product_types = {"european", "asian", "up_and_out_barrier"}
+    if not isinstance(option.product_type, str):
+        raise ValueError("Product type must be a string.")
 
     if option.product_type.lower() not in valid_product_types:
         raise ValueError(
@@ -96,17 +83,13 @@ def validate_inputs(
             "or 'up_and_out_barrier'."
         )
 
-    if simulations < 2:
-        raise ValueError("Use at least 2 simulations.")
-
-    if time_steps < 1:
-        raise ValueError("Use at least 1 time step.")
-
-    if option.product_type == "up_and_out_barrier":
-        if option.barrier_price is None:
-            raise ValueError(
-                "Barrier options require a barrier price."
-            )
+    if option.product_type.lower() == "up_and_out_barrier":
+        if (option.barrier_price is None
+                or isinstance(option.barrier_price, bool)
+                or not isinstance(option.barrier_price, (int, float))
+                or not isfinite(option.barrier_price)
+                or option.barrier_price <= 0):
+            raise ValueError("Barrier options require a finite positive barrier price.")
 
         if option.barrier_price <= market.spot_price:
             raise ValueError(
@@ -114,31 +97,32 @@ def validate_inputs(
                 "must be above the current stock price."
             )
 
-# 3. FULL STOCK-PRICE PATH SIMULATOR
 
-def simulate_price_paths(
+
+def iter_price_paths(
     market: MarketData,
     option: OptionContract,
     simulations: int,
     time_steps: int,
     seed: int | None = 42
-) -> list[list[float]]:
-    """
-    Simulate many possible stock-price paths.
+) -> Iterator[list[float]]:
 
-    Each path looks like:
-        [S0, S1, S2, ..., ST]
 
-    Example with 4 time steps:
-        [100.00, 103.20, 98.50, 101.40, 107.80]
 
-    Geometric Brownian Motion formula:
-        S(t + dt) = S(t) * exp(
-            (r - q - 0.5 * sigma^2) * dt
-            + sigma * sqrt(dt) * Z
-        )
-    """
 
+
+
+
+
+
+
+
+
+
+
+
+
+    validate_inputs(market, option, simulations, time_steps)
     rng = Random(seed)
 
     time_increment = option.maturity_years / time_steps
@@ -152,8 +136,6 @@ def simulate_price_paths(
     volatility_step_size = (
         market.volatility * sqrt(time_increment)
     )
-
-    all_paths = []
 
     for _ in range(simulations):
         current_path = [market.spot_price]
@@ -169,19 +151,27 @@ def simulate_price_paths(
 
             current_path.append(current_stock_price)
 
-        all_paths.append(current_path)
+        yield current_path
 
-    return all_paths
+def simulate_price_paths(
+    market: MarketData,
+    option: OptionContract,
+    simulations: int,
+    time_steps: int,
+    seed: int | None = 42,
+) -> list[list[float]]:
 
-# 4. PAYOFF FUNCTIONS
+    return list(iter_price_paths(market, option, simulations, time_steps, seed))
+
+
 
 def vanilla_payoff(
     stock_price: float,
     option: OptionContract
 ) -> float:
-    """
-    Standard European call/put payoff.
-    """
+
+
+
 
     if option.option_type.lower() == "call":
         return max(stock_price - option.strike_price, 0.0)
@@ -193,9 +183,9 @@ def european_payoff(
     price_path: list[float],
     option: OptionContract
 ) -> float:
-    """
-    European options only use the final stock price.
-    """
+
+
+
 
     terminal_stock_price = price_path[-1]
 
@@ -206,12 +196,12 @@ def asian_payoff(
     price_path: list[float],
     option: OptionContract
 ) -> float:
-    """
-    Arithmetic-average Asian option.
 
-    The initial stock price is excluded from the average.
-    Only monitored future prices are included.
-    """
+
+
+
+
+
 
     monitored_prices = price_path[1:]
 
@@ -226,13 +216,13 @@ def up_and_out_barrier_payoff(
     price_path: list[float],
     option: OptionContract
 ) -> float:
-    """
-    If the stock price ever reaches or exceeds the barrier,
-    the option becomes worthless ("knocked out").
 
-    This is discrete monitoring: the barrier is checked at
-    each simulated time step.
-    """
+
+
+
+
+
+
 
     barrier_was_hit = any(
         stock_price >= option.barrier_price
@@ -251,9 +241,9 @@ def calculate_path_payoff(
     price_path: list[float],
     option: OptionContract
 ) -> float:
-    """
-    Send each path to the correct payoff rule.
-    """
+
+
+
 
     product_type = option.product_type.lower()
 
@@ -268,21 +258,26 @@ def calculate_path_payoff(
 
     raise ValueError("Unsupported product type.")
 
-# 5. MONTE CARLO PRICING ENGINE
+
 
 def price_option_monte_carlo(
     market: MarketData,
     option: OptionContract,
     simulations: int = 50_000,
     time_steps: int = 252,
-    seed: int | None = 42
+    seed: int | None = 42,
+        *,
+        backend: str = "auto",
+        batch_size: int = 8192,
+        variance_reduction: str = "none",
+        pilot_simulations: int = 2048,
 ) -> PricingResult:
-    """
-    Price any supported option product using full stock paths.
 
-    252 time steps represents approximately one trading year
-    of daily monitoring.
-    """
+
+
+
+
+
 
     validate_inputs(
         market=market,
@@ -291,54 +286,13 @@ def price_option_monte_carlo(
         time_steps=time_steps
     )
 
-    simulated_paths = simulate_price_paths(
-        market=market,
-        option=option,
-        simulations=simulations,
-        time_steps=time_steps,
-        seed=seed
-    )
+    return PricingResult(**price_kernel(
+        market, option, simulations, time_steps, seed,
+        backend=backend, batch_size=batch_size,
+        variance_reduction=variance_reduction, pilot_simulations=pilot_simulations,
+    ))
 
-    path_payoffs = [
-        calculate_path_payoff(path, option)
-        for path in simulated_paths
-    ]
 
-    average_payoff = sum(path_payoffs) / simulations
-
-    present_value_discount = exp(
-        -market.risk_free_rate * option.maturity_years
-    )
-
-    estimated_price = (
-        present_value_discount * average_payoff
-    )
-
-    payoff_standard_deviation = stdev(path_payoffs)
-
-    standard_error = (
-        present_value_discount
-        * payoff_standard_deviation
-        / sqrt(simulations)
-    )
-
-    confidence_interval_low = (
-        estimated_price - 1.96 * standard_error
-    )
-
-    confidence_interval_high = (
-        estimated_price + 1.96 * standard_error
-    )
-
-    return PricingResult(
-        price=estimated_price,
-        standard_error=standard_error,
-        confidence_interval_low=confidence_interval_low,
-        confidence_interval_high=confidence_interval_high,
-        simulations=simulations
-    )
-
-# 6. RESULT DISPLAY
 
 def print_pricing_summary(
     market: MarketData,
@@ -376,12 +330,12 @@ def print_pricing_summary(
 
     print("=" * 60 + "\n")
 
-# 7. PROGRAM ENTRY POINT
+
 
 def main() -> None:
-    """
-    Change only this section to test different contracts.
-    """
+
+
+
 
     market = MarketData(
         spot_price = 100.00,
@@ -396,8 +350,8 @@ def main() -> None:
         option_type = "call",
         product_type = "asian"
 
-        # For a barrier option, add:
-        # barrier_price=130.00
+
+
     )
 
     simulations = 50_000
