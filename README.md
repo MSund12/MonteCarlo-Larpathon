@@ -1,5 +1,11 @@
 # Monte Carlo option pricing
 
+## Project Wiki
+
+The [project Wiki pages](wiki/Home.md) explain setup, pricing engines, inputs,
+Greeks, variance reduction, charts, testing, troubleshooting, and model assumptions.
+Use the [page index](wiki/_Sidebar.md) to browse all topics.
+
 ## Unified demo — start here
 
 The main application is now **`monte_carlo_demo.py`**, a single runnable file
